@@ -25,7 +25,7 @@ func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
 }
 
 func hash(link string) string {
-	num = crc32.ChecksumIEEE([]byte(link))
+	num := crc32.ChecksumIEEE([]byte(link))
 	return fmt.Sprintf("%x", num)
 }
 
