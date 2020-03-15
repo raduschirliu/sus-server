@@ -1,19 +1,17 @@
 package main
 
 import (
-	"database/sql"
-	"hash/crc32"
-	"io/ioutil"
-
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+
+	"github.com/raduschirliu/sus-server/db"
+	"github.com/raduschirliu/sus-server/util"
 )
 
 func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
@@ -24,44 +22,27 @@ func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
 	w.Write(response)
 }
 
-func hash(link string) string {
-	num := crc32.ChecksumIEEE([]byte(link))
-	return fmt.Sprintf("%x", num)
+func getLink(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Got request on GET")
+	jsonResponse(w, http.StatusOK, "GET works")
 }
 
-func checkError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func runScript(db *sql.DB, file string) {
-	content, err := ioutil.ReadFile(file)
-	checkError(err)
-
-	contentStr := string(content)
-	_, err = db.Exec(contentStr)
-	checkError(err)
+func postLink(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Got request on POST")
+	jsonResponse(w, http.StatusOK, "POST works")
 }
 
 func main() {
 	err := godotenv.Load()
-	checkError(err)
+	util.CheckError(err)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Got request")
-		jsonResponse(w, http.StatusOK, "yay it works")
-	})
+	r.HandleFunc("/", getLink).Methods("GET")
+	r.HandleFunc("/", postLink).Methods("POST")
 
 	port := os.Getenv("PORT")
-	dbURL := os.Getenv("DATABASE_URL")
-
-	db, err := sql.Open("postgres", dbURL)
-	checkError(err)
+	db.Init()
 	defer db.Close()
-
-	// runScript(db, "sql/init.sql")
 
 	fmt.Println("Running server on port " + port)
 
