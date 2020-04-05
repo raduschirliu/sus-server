@@ -76,8 +76,8 @@ func main() {
 	godotenv.Load()
 
 	r := mux.NewRouter()
-	r.HandleFunc("/link", getLink).Methods("GET", "OPTIONS")
-	r.HandleFunc("/link", postLink).Methods("POST", "OPTIONS")
+	r.HandleFunc("/link", getLink).Methods("GET")
+	r.HandleFunc("/link", postLink).Methods("POST")
 
 	port := os.Getenv("PORT")
 	db.Init()

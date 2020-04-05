@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -30,10 +31,11 @@ func Close() {
 
 // Query database for a shortened link with given id
 func Query(id string) util.Result {
-	var res util.Result
-	err := db.Get(&res.Link, "SELECT * FROM links WHERE id=$1", id)
+	res := util.Result{Link: &util.Link{}}
+	err := db.Get(res.Link, "SELECT * FROM links WHERE id=$1 LIMIT 1", id)
 
 	if err != nil {
+		fmt.Println(err)
 		res.Error = util.StringPtr("No results found")
 	}
 
@@ -48,7 +50,7 @@ func Insert(id string, link string) util.Result {
 	_, err := db.Exec("INSERT INTO links (id, link) VALUES ($1, $2)", id, link)
 
 	if err != nil {
-		res.Error = util.StringPtr("Key already exists")
+		res = Query(id)
 	}
 
 	return res
