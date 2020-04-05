@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 
 	"github.com/raduschirliu/sus-server/db"
 	"github.com/raduschirliu/sus-server/util"
@@ -23,9 +24,6 @@ func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	// w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.WriteHeader(status)
 	w.Write(response)
 }
@@ -87,6 +85,7 @@ func main() {
 
 	fmt.Println("Running server on port " + port)
 
-	err := http.ListenAndServe(":"+port, r)
+	handler := cors.Default().Handler(r)
+	err := http.ListenAndServe(":"+port, handler)
 	util.CheckError(err)
 }
