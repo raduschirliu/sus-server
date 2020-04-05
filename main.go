@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -15,21 +16,64 @@ import (
 )
 
 func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
-	response, _ := json.Marshal(data)
+	var response []byte
+
+	if data != nil {
+		response, _ = json.Marshal(data)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(response)
 }
 
+func decodeJSON(dest interface{}, r *http.Request) {
+	bytes, err := ioutil.ReadAll(r.Body)
+	util.CheckError(err)
+	json.Unmarshal(bytes, dest)
+}
+
 func getLink(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Got request on GET")
-	jsonResponse(w, http.StatusOK, "GET works")
+	fmt.Printf("GET: %s\n", r.URL)
+
+	type query struct {
+		ID *string
+	}
+
+	var q query
+	decodeJSON(&q, r)
+
+	if q.ID == nil {
+		jsonResponse(w, http.StatusBadRequest, nil)
+		return
+	}
+
+	fmt.Println("Getting: ", q.ID)
+	res := db.Query(*q.ID)
+
+	jsonResponse(w, http.StatusOK, res)
 }
 
 func postLink(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Got request on POST")
-	jsonResponse(w, http.StatusOK, "POST works")
+	fmt.Printf("POST: %s\n", r.URL)
+
+	type query struct {
+		Link *string
+	}
+
+	var q query
+	decodeJSON(&q, r)
+
+	if q.Link == nil {
+		jsonResponse(w, http.StatusBadRequest, nil)
+		return
+	}
+
+	id := util.Hash(*q.Link)
+	fmt.Println("Inserting: ", id, " ", q.Link)
+	res := db.Insert(id, *q.Link)
+
+	jsonResponse(w, http.StatusOK, res)
 }
 
 func main() {
@@ -37,8 +81,8 @@ func main() {
 	util.CheckError(err)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", getLink).Methods("GET")
-	r.HandleFunc("/", postLink).Methods("POST")
+	r.HandleFunc("/link", getLink).Methods("GET")
+	r.HandleFunc("/link", postLink).Methods("POST")
 
 	port := os.Getenv("PORT")
 	db.Init()
@@ -46,6 +90,6 @@ func main() {
 
 	fmt.Println("Running server on port " + port)
 
-	http.ListenAndServe(":"+port, r)
-	fmt.Println("Stopping server")
+	err = http.ListenAndServe(":"+port, r)
+	util.CheckError(err)
 }
