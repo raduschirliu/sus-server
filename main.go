@@ -36,20 +36,15 @@ func decodeJSON(dest interface{}, r *http.Request) {
 func getLink(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("GET: %s\n", r.URL)
 
-	type query struct {
-		ID *string
-	}
+	id := r.URL.Query().Get("id")
 
-	var q query
-	decodeJSON(&q, r)
-
-	if q.ID == nil {
+	if id == "" {
 		jsonResponse(w, http.StatusBadRequest, nil)
 		return
 	}
 
-	fmt.Println("Getting: ", q.ID)
-	res := db.Query(*q.ID)
+	fmt.Println("Getting: ", id)
+	res := db.Query(id)
 
 	jsonResponse(w, http.StatusOK, res)
 }
