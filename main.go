@@ -22,8 +22,10 @@ func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
 		response, _ = json.Marshal(data)
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	// w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.WriteHeader(status)
 	w.Write(response)
 }
@@ -76,8 +78,8 @@ func main() {
 	godotenv.Load()
 
 	r := mux.NewRouter()
-	r.HandleFunc("/link", getLink).Methods("GET")
-	r.HandleFunc("/link", postLink).Methods("POST")
+	r.HandleFunc("/link", getLink).Methods("GET", "OPTIONS")
+	r.HandleFunc("/link", postLink).Methods("POST", "OPTIONS")
 
 	port := os.Getenv("PORT")
 	db.Init()
