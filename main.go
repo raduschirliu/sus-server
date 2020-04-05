@@ -77,8 +77,7 @@ func postLink(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	err := godotenv.Load()
-	util.CheckError(err)
+	godotenv.Load()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/link", getLink).Methods("GET")
@@ -90,6 +89,6 @@ func main() {
 
 	fmt.Println("Running server on port " + port)
 
-	err = http.ListenAndServe(":"+port, r)
+	err := http.ListenAndServe(":"+port, r)
 	util.CheckError(err)
 }
