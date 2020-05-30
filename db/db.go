@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -35,8 +34,7 @@ func Query(id string) util.Result {
 	err := db.Get(res.Link, "SELECT * FROM links WHERE id=$1 LIMIT 1", id)
 
 	if err != nil {
-		fmt.Println(err)
-		res.Error = util.StringPtr("No results found")
+		res = util.Result{Error: util.StringPtr("No results found")}
 	}
 
 	return res

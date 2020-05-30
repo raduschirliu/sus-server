@@ -14,8 +14,8 @@ type Link struct {
 
 // Result holds information that could be returned from any request
 type Result struct {
-	Link  *Link   `json:"link"`
-	Error *string `json:"error"`
+	Link  *Link   `json:"link,omitempty"`
+	Error *string `json:"error,omitempty"`
 }
 
 // Hash a string using CRC32

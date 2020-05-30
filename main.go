@@ -44,7 +44,6 @@ func getLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Getting: ", id)
 	res := db.Query(id)
 
 	jsonResponse(w, http.StatusOK, res)
@@ -66,7 +65,6 @@ func postLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := util.Hash(*q.Link)
-	fmt.Println("Inserting: ", id, " ", q.Link)
 	res := db.Insert(id, *q.Link)
 
 	jsonResponse(w, http.StatusOK, res)
